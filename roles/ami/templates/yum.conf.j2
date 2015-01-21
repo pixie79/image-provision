@@ -1,0 +1,37 @@
+[base]
+name=CentOS-{{ centos_version_number }} - Base
+mirrorlist=http://mirrorlist.centos.org/?release={{ centos_version_number }}&arch={{ centos_arch }}&repo=os
+#baseurl=http://mirror.centos.org/centos/{{ centos_version_number }}/os/{{ centos_arch }}/
+gpgcheck=1
+gpgkey={{ centos_rpm_key }}
+ 
+[updates]
+name=CentOS-{{ centos_version_number }} - Updates
+mirrorlist=http://mirrorlist.centos.org/?release={{ centos_version_number }}&arch={{ centos_arch }}&repo=updates
+#baseurl=http://mirror.centos.org/centos/{{ centos_version_number }}/updates/{{ centos_arch }}/
+gpgcheck=1
+gpgkey={{ centos_rpm_key }}
+ 
+[extras]
+name=CentOS-{{ centos_version_number }} - Extras
+mirrorlist=http://mirrorlist.centos.org/?release={{ centos_version_number }}&arch={{ centos_arch }}&repo=extras
+#baseurl=http://mirror.centos.org/centos/{{ centos_version_number }}/extras/{{ centos_arch }}/
+gpgcheck=1
+gpgkey={{ centos_rpm_key }}}
+ 
+[centosplus]
+name=CentOS-{{ centos_version_number }} - Plus
+mirrorlist=http://mirrorlist.centos.org/?release={{ centos_version_number }}&arch={{ centos_arch }}&repo=centosplus
+#baseurl=http://mirror.centos.org/centos/{{ centos_version_number }}/centosplus/{{ centos_arch }}/
+gpgcheck=1
+enabled=0
+gpgkey={{ centos_rpm_key }}
+ 
+[contrib]
+name=CentOS-{{ centos_version_number }} - Contrib
+mirrorlist=http://mirrorlist.centos.org/?release={{ centos_version_number }}&arch={{ centos_arch }}&repo=contrib
+#baseurl=http://mirror.centos.org/centos/{{ centos_version_number }}/contrib/{{ centos_arch }}/
+gpgcheck=1
+enabled=0
+gpgkey={{ centos_rpm_key }}
+

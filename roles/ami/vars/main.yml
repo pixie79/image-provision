@@ -1,0 +1,6 @@
+centos_version_number: 6.6
+centos_arch: x86_64
+centos_rpm_key: http://mirror.centos.org/centos/RPM-GPG-KEY-6
+centos_version: centos-{{ centos_version_number }}-{{ centos_arch }}
+build_dir: /opt/build
+mount_dir: {{ build_dir }}/mnt

@@ -1,0 +1,111 @@
+
+
+# Install EPEL6 Repo on Host VM
+- yum: name=http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm state=p
+
+# Install Required Build packages on Host VM
+- yum: name={{ item }} state=installed
+  with_items:
+    - cloud-init
+    - python-devel
+    - python-pip
+    - python
+    - libselinux-python
+    - java-1.7.0-openjdk
+    - curl
+    - rsync
+    - unzip
+    - wget
+    - zip
+    - tar
+    - ruby
+    - MAKEDEV
+
+# Setup Host VM Build Env
+- file: name={{ build_dir }} state=directory mode=0755
+- file: name={{ build_dir }}/certificates state=directory mode=0755
+- file: name={{ build_dir }}/tools state=directory mode=0755
+- file: name={{ build_dir }}/images state=directory mode=0755
+- file: name={{ build_dir }}/yum state=directory mode=0755
+- file: name={{ mount_dir }} state=directory mode=0755
+
+# Fetch ec2 API & AMI Tools then install
+- get_url: url={{ ec2_api_tools_url }} dest={{ build_dir }}/tools/ec2-api-tools.zip
+
+- unarchive: src={{ build_dir }}/tools/ec2-api-tools.zip dest={{ build_dir }}/tools copy=no
+- command: cp ec2-api-tools-*/* {{ build_dir }}/tools
+  args:
+    chdir: {{ build_dir }}/tools/
+    creates: {{ build_dir }}/tools/aip
+
+- yum: name=http://s3.amazonaws.com/ec2-downloads/ec2-ami-tools-{{ ec2_ami_tools_version }}.noarch.rpm state=present
+
+# Create the image loopback file and format
+- shell: dd if=/dev/zero of={{ build_dir }}/images/{{ centos_version }}-base.img bs=1M count=10240 && mkfs.ext4 -F -j {{ build_dir }}/images/{{ centos_version }}-base.img
+  args:
+    chdir: {{ build_dir }}/images/
+    creates: {{ build_dir }}/images/{{centos_version }}-base.img
+
+# Mount the image file via the loopback mount point
+- mount: name={{ mount_dir }} src={{ build_dir }}/images/{{centos_version }}-base.img fstype=ext4 opts=rw state=present
+
+# Create the base directories within the image file
+- file: name={{ mount_dir }}/dev state=directory mode=0755
+- file: name={{ mount_dir }}/etc state=directory mode=0755
+- file: name={{ mount_dir }}/proc state=directory mode=0755
+- file: name={{ mount_dir }}/sys state=directory mode=0755
+- file: name={{ mount_dir }}/var state=directory mode=0755
+- file: name={{ mount_dir }}/var/cache state=directory mode=0755
+- file: name={{ mount_dir }}/var/log state=directory mode=0755
+- file: name={{ mount_dir }}/var/lock state=directory mode=0755
+- file: name={{ mount_dir }}/var/lib state=directory mode=0755
+- file: name={{ mount_dir }}/var/lib/rpm state=directory mode=0755
+
+# Populate the /dev directory with a minimal set of devices. Ignore any MAKEDEV: mkdir: File exists warnings.
+
+- command: /sbin/MAKEDEV -d {{ mount_dir }}/dev -x console
+  args:
+    creates: {{ mount_dir }}/dev/console
+    warn: False
+
+- command: /sbin/MAKEDEV -d {{ mount_dir }}/dev -x null
+  args:
+    creates: {{ mount_dir }}/dev/null
+    warn: False
+
+- command: /sbin/MAKEDEV -d {{ mount_dir }}/dev -x zero
+  args:
+    creates: {{ mount_dir }}/dev/zero
+    warn: False
+
+- command: /sbin/MAKEDEV -d {{ mount_dir }}/dev -x urandom
+  args:
+    creates: {{ mount_dir }}/dev/urandom
+    warn: False
+
+# Mount dev, pts, shm, proc, and sys in the new root file system.
+- command: mount -o bind /dev {{ mount_dir }}/dev
+  args:
+    creates: {{ mount_dir }}/dev/tty
+    warn: False
+
+- command: mount -o bind /dev/pts {{ mount_dir }}/dev/pts
+  args:
+    creates: {{ mount_dir }}/dev/pts/0
+    warn: False
+
+- command: mount -o bind /dev/shm {{ mount_dir}}/dev/shm
+  args:
+    warn: False
+
+- command: mount -o bind /proc {{ mount_dir }}/proc
+  args:
+    creates: {{ mount_dir }}/proc/loadavg
+    warn: False
+
+- command: mount -o bind /sys {{ mount_dir }}/sys
+  args:
+    creates: {{ mount_dir }}/sys/block
+    warn: False
+
+- template: src=yum.conf.j2 dest={{ build_dir }}/yum/yum.conf
