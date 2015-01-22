@@ -1,0 +1,70 @@
+{
+  "variables": {
+    "version": {{ build_version }}
+  },
+  "provisioners": [
+    {
+      "type": "shell",
+      "execute_command": "sudo {{.Vars}} sh {{.Path}}",
+      "scripts": [
+        "scripts/vagrant.sh",
+        "scripts/vmtools.sh",
+        "scripts/cleanup.sh",
+        "scripts/zerodisk.sh"
+      ]
+    }
+  ],
+  "post-processors": [
+    {
+      "type": "vagrant",
+      "output": {{ output_box_name }}
+    }
+  ],
+  "builders": [
+    {
+      "type": "virtualbox-iso",
+      "iso_url": {{ centos_net_iso_url }},
+      "iso_checksum": {{ centos_net_iso_checksum }},
+      "iso_checksum_type": "sha256",
+      "ssh_username": {{ vagrant_ssh_username }},
+      "ssh_password": {{ vagrant_ssh_password }},
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+      ],
+      "disk_size": {{ vagrant_disk_size }},
+      "hard_drive_interface": "sata",
+      "guest_additions_path": "/usr/share/virtualbox/VBoxGuestAdditions.iso",
+      "guest_additions_sha256": {{ vitualbox_guest_additions_sha256sum }},
+      "guest_os_type": {{ vagrant_guest_os_type }},
+      "headless": "true",
+      "http_directory": "http",
+      "shutdown_command": "sudo /sbin/halt -p",
+      "vboxmanage": [
+        [ "modifyvm", "{{.Name}}", "--memory", {{ vagrant_memory }} ],
+        [ "modifyvm", "{{.Name}}", "--cpus", {{ vagrant_cpus }} ]
+      ]
+    },
+    {
+      "type": "vmware-iso",
+      "iso_url": {{ centos_net_iso_url }},
+      "iso_checksum": {{ centos_net_iso_checksum }},
+      "iso_checksum_type": "sha256",
+      "ssh_username": {{ vagrant_ssh_username }},
+      "ssh_password": {{ vagrant_ssh_password }},
+      "disk_size": {{ vagrant_disk_size }},
+      "tools_upload_flavor": "linux",
+      "guest_os_type": {{ vmware_guest_os_type }},
+      "headless": "true",
+      "shutdown_command": "sudo /sbin/halt -p",
+      "http_directory": "http",
+      "boot_command": [
+        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+      ],
+      "vmx_data": {
+        "memsize": {{ vagrant_memory }},
+        "numvcpus": {{ vagrant_cpus }},
+        "vhv.enable": "TRUE"
+      }
+    }
+  ]
+}

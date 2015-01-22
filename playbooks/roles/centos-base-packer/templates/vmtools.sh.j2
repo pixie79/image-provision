@@ -1,0 +1,19 @@
+if [[ $PACKER_BUILDER_TYPE =~ virtualbox ]]; then
+VBOX_VERSION=$(cat /home/{{ vagrant_ssh_username }}/.vbox_version)
+cd /tmp
+mount -o loop /home/{{ vagrant_ssh_username }}/VBoxGuestAdditions.iso /mnt
+sh /mnt/VBoxLinuxAdditions.run
+umount /mnt
+rm -rf /home/{{ vagrant_ssh_username }}/VBoxGuestAdditions.iso
+fi
+
+if [[ $PACKER_BUILDER_TYPE =~ vmware ]]; then
+yum -y install fuse fuse-libs
+mount -o loop /home/{{ vagrant_ssh_username }}/linux.iso /mnt
+cd /tmp
+tar zxf /mnt/VMwareTools-*.tar.gz
+umount /mnt
+/tmp/vmware-tools-distrib/vmware-install.pl --default
+rm -rf /tmp/vmware-tools-distrib
+rm -rf /home/{{ vagrant_ssh_username }}/linux.iso
+fi

@@ -1,0 +1,11 @@
+---
+packer_version: 0.7.5
+packer_sha256sum: 8fab291c8cc988bd0004195677924ab6846aee5800b6c8696d71d33456701ef6
+packer_zip_filename: "packer_{{ packer_version }}_linux_amd64.zip"
+packer_path: /opt/packer
+
+vagrant_version: 1.7.2
+vagrant_sha256sum: 683d9926922685adfb456605ef6becaa811b87f18f54faf7c19abc4888636617
+vagrant_rpm_filename: "vagrant_{{ vagrant_version }}_x86_64.rpm"
+
+virtualbox_version: VirtualBox-4.3

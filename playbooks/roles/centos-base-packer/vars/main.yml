@@ -1,0 +1,19 @@
+---
+build_dir: /opt/build
+build_version: 0.1
+centos_version: 6.6
+centos_arch: x86_64
+centos_mirror:  "http://mirrors.ukfast.co.uk/sites/ftp.centos.org/{{ centos_version }}"
+centos_net_iso_url: "{{ centos_mirror }}/isos/{{ centos_arch }}/CentOS-{{ centos_version }}-{{ centos_arch }}-netinstall.iso"
+centos_net_iso_checksum: ad8f6de098503174c7609d172679fa0dd276f4b669708933d9c4927bd3fe1017
+vagrant_root_password: vagrant
+vagrant_ssh_username: vagrant
+vagrant_ssh_password: vagrant
+vagrant_ssh_public_key_url: https://raw.githubusercontent.com/pixie79/vagrant/master/keys/vagrant.pub
+vagrant_disk_size: 10240
+vagrant_memory: 1024
+vagrant_cpus: 1
+virtualbox_guest_additions_sha256sum: 9ab48f44ac26a6deb374cb5fe6bad103bbf4fdf5186140e2d40ebe48bd01f3ea
+vagrant_guest_os_type: RedHat_64
+vmware_guest_os_type: centos-64
+output_box_name: "CentOS-{{ centos_version }}-{{ centos_arch }}-{{ build_version }}-vbox-base.box"

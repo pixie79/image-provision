@@ -1,3 +1,6 @@
+[main]
+installroot={{ mount_dir }}
+
 [base]
 name=CentOS-{{ centos_version_number }} - Base
 mirrorlist=http://mirrorlist.centos.org/?release={{ centos_version_number }}&arch={{ centos_arch }}&repo=os
@@ -17,7 +20,7 @@ name=CentOS-{{ centos_version_number }} - Extras
 mirrorlist=http://mirrorlist.centos.org/?release={{ centos_version_number }}&arch={{ centos_arch }}&repo=extras
 #baseurl=http://mirror.centos.org/centos/{{ centos_version_number }}/extras/{{ centos_arch }}/
 gpgcheck=1
-gpgkey={{ centos_rpm_key }}}
+gpgkey={{ centos_rpm_key }}
  
 [centosplus]
 name=CentOS-{{ centos_version_number }} - Plus
@@ -35,3 +38,29 @@ gpgcheck=1
 enabled=0
 gpgkey={{ centos_rpm_key }}
 
+[epel]
+name=Extra Packages for Enterprise Linux {{ epel_version }} - {{ centos_arch }}
+#baseurl=http://download.fedoraproject.org/pub/epel/{{ epel_version }}/{{ centos_arch }}
+mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-{{ epel_version }}&arch={{ centos_arch }}
+failovermethod=priority
+enabled=1
+gpgcheck=1
+gpgkey={{ epel_rpm_key }}
+
+[epel-debuginfo]
+name=Extra Packages for Enterprise Linux {{ epel_version }} - {{ centos_arch }} - Debug
+#baseurl=http://download.fedoraproject.org/pub/epel/{{ epel_version }}/{{ centos_arch }}/debug
+mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-debug-{{ epel_version }}&arch={{ centos_arch }}
+failovermethod=priority
+enabled=0
+gpgkey={{ epel_rpm_key }}
+gpgcheck=1
+
+[epel-source]
+name=Extra Packages for Enterprise Linux {{ epel_version }} - {{ centos_arch }} - Source
+#baseurl=http://download.fedoraproject.org/pub/epel/{{ epel_version }}/SRPMS
+mirrorlist=https://mirrors.fedoraproject.org/metalink?repo=epel-source-{{ epel_version }}&arch={{ centos_arch }}
+failovermethod=priority
+enabled=0
+gpgkey={{ epel_rpm_key }}
+gpgcheck=1

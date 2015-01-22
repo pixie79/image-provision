@@ -1,0 +1,16 @@
+
+---
+- hosts:
+  - localhost
+  gather_facts: False
+  vars:
+    build_version: 0.1
+    vagrant_ssh_username: vagrant
+    vagrant_ssh_password: vagrant
+    vagrant_root_password: vagrant
+    vagrant_ssh_public_key_url: https://raw.githubusercontent.com/pixie79/vagrant/master/keys/vagrant.pub
+    vagrant_disk_size: 20480
+    vagrant_memory: 4096
+    vagrant_cpus: 2
+  roles:
+  - centos-base-packer

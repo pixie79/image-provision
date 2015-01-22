@@ -1,0 +1,60 @@
+install
+url --url {{ centos_mirror }}/os/{{ centos_arch }}
+repo --name updates --baseurl={{ centos_mirror }}/updates/{{ centos_arch }}
+
+# for too new hardware 
+unsupported_hardware
+
+text
+skipx
+bootloader
+
+firewall --disabled
+selinux --disabled
+firstboot --disabled
+
+lang ja_JP.UTF-8
+keyboard jp106
+timezone --utc Asia/Tokyo
+
+zerombr
+clearpart --all --initlabel
+part /boot --size=500
+part swap --hibernation
+part / --size=3000 --grow 
+
+rootpw {{ vagrant_root_password }}
+authconfig --enableshadow --passalgo=sha512
+user --name={{ vagrant_ssh_username }} --groups={{ vagrant_ssh_username }} --password={{ vagrant_ssh_password }}
+
+reboot
+
+%packages --nobase
+@core
+-*firmware
+-b43-openfwwf
+-efibootmgr
+-audit*
+-libX*
+-fontconfig
+-freetype
+sudo
+openssh-clients
+openssh-server
+gcc
+make
+perl
+kernel-firmware
+kernel-devel
+python
+python-devel
+python-pip
+%end
+
+%post
+echo '{{ vagrant_ssh_username }}             ALL=(ALL)   NOPASSWD: ALL' >> /etc/sudoers.d/{{ vagrant_ssh_username }}
+echo 'Defaults:{{ vagrant_ssh_username }}    env_keep += SSH_AUTH_SOCK' >> /etc/sudoers.d/{{ vagrant_ssh_username }}
+chmod 0440 /etc/sudoers.d/{{ vagrant_ssh_username }}
+sed -i 's/^.*requiretty/#Defaults requiretty/' /etc/sudoers
+sed -i 's/rhgb //' /boot/grub/grub.conf
+%end

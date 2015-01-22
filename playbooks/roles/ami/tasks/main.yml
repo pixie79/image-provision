@@ -1,12 +1,11 @@
 
 
 # Install EPEL6 Repo on Host VM
-- yum: name=http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm state=p
+- yum: name={{ epel_rpm }} state=present
 
 # Install Required Build packages on Host VM
 - yum: name={{ item }} state=installed
   with_items:
-    - cloud-init
     - python-devel
     - python-pip
     - python
@@ -33,18 +32,20 @@
 - get_url: url={{ ec2_api_tools_url }} dest={{ build_dir }}/tools/ec2-api-tools.zip
 
 - unarchive: src={{ build_dir }}/tools/ec2-api-tools.zip dest={{ build_dir }}/tools copy=no
-- command: cp ec2-api-tools-*/* {{ build_dir }}/tools
+
+# TODO: Fix creates line
+- shell: mv {{ build_dir }}/tools/ec2-api-tools-{{ ec2_api_tools_version }}/* {{ build_dir }}/tools/
   args:
-    chdir: {{ build_dir }}/tools/
-    creates: {{ build_dir }}/tools/aip
+    chdir: "{{ build_dir }}/tools/"
+    creates: "{{ build_dir }}/tools/license.txt"
 
 - yum: name=http://s3.amazonaws.com/ec2-downloads/ec2-ami-tools-{{ ec2_ami_tools_version }}.noarch.rpm state=present
 
 # Create the image loopback file and format
 - shell: dd if=/dev/zero of={{ build_dir }}/images/{{ centos_version }}-base.img bs=1M count=10240 && mkfs.ext4 -F -j {{ build_dir }}/images/{{ centos_version }}-base.img
   args:
-    chdir: {{ build_dir }}/images/
-    creates: {{ build_dir }}/images/{{centos_version }}-base.img
+    chdir: "{{ build_dir }}/images/"
+    creates: "{{ build_dir }}/images/{{centos_version }}-base.img"
 
 # Mount the image file via the loopback mount point
 - mount: name={{ mount_dir }} src={{ build_dir }}/images/{{centos_version }}-base.img fstype=ext4 opts=rw state=present
@@ -65,33 +66,33 @@
 
 - command: /sbin/MAKEDEV -d {{ mount_dir }}/dev -x console
   args:
-    creates: {{ mount_dir }}/dev/console
+    creates: "{{ mount_dir }}/dev/console"
     warn: False
 
 - command: /sbin/MAKEDEV -d {{ mount_dir }}/dev -x null
   args:
-    creates: {{ mount_dir }}/dev/null
+    creates: "{{ mount_dir }}/dev/null"
     warn: False
 
 - command: /sbin/MAKEDEV -d {{ mount_dir }}/dev -x zero
   args:
-    creates: {{ mount_dir }}/dev/zero
+    creates: "{{ mount_dir }}/dev/zero"
     warn: False
 
 - command: /sbin/MAKEDEV -d {{ mount_dir }}/dev -x urandom
   args:
-    creates: {{ mount_dir }}/dev/urandom
+    creates: "{{ mount_dir }}/dev/urandom"
     warn: False
 
 # Mount dev, pts, shm, proc, and sys in the new root file system.
 - command: mount -o bind /dev {{ mount_dir }}/dev
   args:
-    creates: {{ mount_dir }}/dev/tty
+    creates: "{{ mount_dir }}/dev/tty0"
     warn: False
 
 - command: mount -o bind /dev/pts {{ mount_dir }}/dev/pts
   args:
-    creates: {{ mount_dir }}/dev/pts/0
+    creates: "{{ mount_dir }}/dev/pts/0"
     warn: False
 
 - command: mount -o bind /dev/shm {{ mount_dir}}/dev/shm
@@ -100,12 +101,43 @@
 
 - command: mount -o bind /proc {{ mount_dir }}/proc
   args:
-    creates: {{ mount_dir }}/proc/loadavg
+    creates: "{{ mount_dir }}/proc/loadavg"
     warn: False
 
 - command: mount -o bind /sys {{ mount_dir }}/sys
   args:
-    creates: {{ mount_dir }}/sys/block
+    creates: "{{ mount_dir }}/sys/block"
     warn: False
 
 - template: src=yum.conf.j2 dest={{ build_dir }}/yum/yum.conf
+
+# Install Base packages to loopback
+- yum: name=@base conf_file={{ build_dir }}/yum/yum.conf state=present
+
+- yum: name={{ item }}  conf_file={{ build_dir }}/yum/yum.conf state=present
+  with_items:
+    - "*openssh*"
+    - dhclient
+    - grub
+    - e2fsprogs
+    - yum-plugin-fastestmirror.noarch
+    - vi
+    - emacs
+    - python
+    - python-devel
+    - python-pip
+    - gcc
+    - selinux-policy 
+    - selinux-policy-targeted
+    - libselinux-python
+
+- copy: src=root_bashrc dest={{ mount_dir }}/root/.bashrc mode=0400
+- copy: src=root_bash_profile dest={{ mount_dir }}/root/.bash_profile mode=0400
+- copy: src=network dest={{ mount_dir }}/etc/sysconfig/network mode=0440
+- copy: src=ifcfg-eth0 dest={{ mount_dir }}/etc/sysconfig/network-scripts/ifcfg-eth0
+- copy: src=selinux dest={{ mount_dir }}/etc/sysconfig/selinux
+- copy: src=fstab dest={{ mount_dir }}/etc/fstab mode=0660
+
+- command: /usr/sbin/chroot {{ mount_dir }} /sbin/chkconfig --level 2345 network on
+
+#    - cloud-init

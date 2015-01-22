@@ -5,12 +5,8 @@
 
 ---
 - hosts:
-  - 127.0.0.1
-  connection: local
+  - host_vm
   gather_facts: False
-  vars:
-    ec2_ami_tools_version: 1.5.6
-    ec2_api_tools_url: http://s3.amazonaws.com/ec2-downloads/ec2-api-tools.zip&token=A80325AA4DAB186C80828ED5138633E3F49160D9
   roles:
   - ami
 

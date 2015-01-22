@@ -1,0 +1,22 @@
+
+---
+- file: name={{ build_dir }} state=directory mode=0755
+- file: name={{ build_dir }}/packer state=directory mode=0755
+- file: name={{ build_dir }}/packer/centos-base state=directory mode=0755
+- file: name={{ build_dir }}/packer/centos-base/http state=directory mode=0755
+- file: name={{ build_dir }}/packer/centos-base/scripts state=directory mode=0755
+
+- template: src=CentOS6_base.json.j2 dest={{ build_dir }}/packer/centos-base/CentOS6_base.json mode=0444
+- template: src=ks.cfg.j2 dest={{ build_dir }}/packer/centos-base/http/ks.cfg mode=0755
+- template: src=vagrant.sh.j2 dest={{ build_dir }}/packer/centos-base/scripts/vagrant.sh mode=0755
+- template: src=vmtools.sh.j2 dest={{ build_dir }}/packer/centos-base/scripts/vmtools.sh mode=0755
+- copy: src=cleanup.sh dest={{ build_dir }}/packer/centos-base/scripts/cleanup.sh mode=0755
+- copy: src=zerodisk.sh dest={{ build_dir }}/packer/centos-base/scripts/zerodish.sh mode=0755
+
+- shell: /opt/packer/packer validate CentOS6_base.json
+  args:
+    chdir: {{ build_dir }}/packer/centos-base
+
+- shell: /opt/packer/packer build -only virtualbox-iso CentOS6.json
+  args:
+    chdir: {{ build_dir }}/packer/centos-base
