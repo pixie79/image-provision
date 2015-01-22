@@ -15,19 +15,21 @@
     }
   ],
   "post-processors": [
-    {
-      "type": "vagrant",
-      "output": "{{ output_box_name }}.box"
-    },
-    {
-      "type":     "vagrant-s3",
-      "region": "{{ s3_region }}",
-      "bucket":   "{{ s3_bucket }}",
-      "manifest": "vagrant/{{ output_box_name }}.json",
-      "box_name": "{{ output_box_name }}.box",
-      "box_dir":  "vagrant/boxes",
-      "version":  "{{ build_bersion }}"
-    }
+    [
+      {
+        "type": "vagrant",
+        "output": "{{ output_box_name }}.box"
+      },
+      {
+        "type":     "vagrant-s3",
+        "region": "{{ s3_region }}",
+        "bucket":   "{{ s3_bucket }}",
+        "manifest": "vagrant/{{ output_box_name }}.json",
+        "box_name": "{{ output_box_name }}.box",
+        "box_dir":  "vagrant/boxes",
+        "version":  "{{ build_version }}"
+      }
+    ]
   ],
   "builders": [
     {

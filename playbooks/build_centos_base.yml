@@ -13,5 +13,8 @@
     vagrant_memory: 4096
     vagrant_cpus: 2
     virtualbox_headless_mode: false
+    s3_region: us-east-1
+    s3_bucket: bdpimages
+    s3_box_dir: vagrant/boxes
   roles:
   - centos-base-packer

@@ -12,6 +12,3 @@ centos_lang: en_GB.UTF-8
 centos_keyboard: uk
 centos_timezone: Europe/London
 output_box_name: "CentOS-{{ centos_version }}-{{ centos_arch }}-{{ build_version }}-vbox-base"
-s3_region: us-east-1
-s3_bucket: pixie79Images
-s3_box_dir: vagrant/boxes
