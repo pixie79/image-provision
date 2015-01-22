@@ -12,5 +12,6 @@
     vagrant_disk_size: 20480
     vagrant_memory: 4096
     vagrant_cpus: 2
+    virtualbox_headless_mode: false
   roles:
   - centos-base-packer

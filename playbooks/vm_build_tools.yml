@@ -5,4 +5,4 @@
   - localhost
   gather_facts: False
   roles:
-  - packer
+  - vm_build_tools

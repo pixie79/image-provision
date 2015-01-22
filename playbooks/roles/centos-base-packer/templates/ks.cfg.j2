@@ -13,9 +13,9 @@ firewall --disabled
 selinux --disabled
 firstboot --disabled
 
-lang ja_JP.UTF-8
-keyboard jp106
-timezone --utc Asia/Tokyo
+lang {{ centos_lang }}
+keyboard {{ centos_keyboard }}
+timezone --utc {{ centos_timezone }}
 
 zerombr
 clearpart --all --initlabel
@@ -48,7 +48,6 @@ kernel-firmware
 kernel-devel
 python
 python-devel
-python-pip
 %end
 
 %post

@@ -1,6 +1,6 @@
 date > /etc/vagrant_box_build_time
 cd ~{{ vagrant_ssh_username }}
 mkdir -m 700 .ssh
-curl -L {{ vagrant_ssh_public_key }} -o .ssh/authorized_keys
+curl -L {{ vagrant_ssh_public_key_url }} -o .ssh/authorized_keys
 chmod 600 .ssh/authorized_keys
 chown -R {{ vagrant_ssh_username }}:{{ vagrant_ssh_username }} .

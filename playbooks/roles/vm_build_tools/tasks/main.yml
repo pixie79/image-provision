@@ -1,0 +1,31 @@
+
+
+---
+#Install Mercurail and Git Packages
+- yum: name={{ item }} state=present
+  with_items:
+    - mercurial
+    - git
+
+# Create Downloads folder to hold program downloads
+- file: name=/opt/downloads state=directory mode=0775
+
+# Install Packer
+- file: name=/opt/packer state=directory mode=0755
+- get_url: url=https://dl.bintray.com/mitchellh/packer/{{ packer_zip_filename }} dest=/opt/downloads/{{ packer_zip_filename }} mode=0444 sha256sum={{ packer_sha256sum }}
+- unarchive: src=/opt/downloads/{{ packer_zip_filename }} dest=/opt/packer creates=/opt/packer/packer
+
+# Install Vagrant
+- get_url: url=https://dl.bintray.com/mitchellh/vagrant/{{ vagrant_rpm_filename }} dest=/opt/downloads/{{vagrant_rpm_filename }} mode=0444 sha256sum={{ vagrant_sha256sum }}
+- lineinfile: dest=/etc/profile.d/packer.sh state=present line="PATH={{ packer_path }}:$PATH" create=true
+- yum: name=/opt/downloads/{{ vagrant_rpm_filename }} state=present
+
+# Install Virtualbox
+- get_url: url=http://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo dest=/etc/yum.repos.d/virtualbox.repo mode=0440
+- yum: name={{ virtualbox_version }} state=present
+
+# Install GoLang
+- get_url: url=https://storage.googleapis.com/golang/{{ go_filename }} dest=/opt/downloads/{{ go_filename }}
+- unarchive: src=/opt/downloads/{{ go_filename }} dest=/usr/local creates=/usr/local/go/bin/go
+- lineinfile: dest=/etc/profile.d/go.sh state=present line="PATH=/usr/local/go/bin:$PATH" create=true
+- shell: export GOPATH=/tmp && /usr/local/go/bin/go get github.com/lmars/packer-post-processor-vagrant-s3 && cp $GOPATH/bin/packer-post-processor-vagrant-s3 /opt/packer/

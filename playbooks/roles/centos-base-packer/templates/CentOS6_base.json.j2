@@ -5,7 +5,7 @@
   "provisioners": [
     {
       "type": "shell",
-      "execute_command": "sudo {{.Vars}} sh {{.Path}}",
+      "execute_command": "sudo {% raw %}{{.Vars}} sh {{.Path}}{% endraw %}",
       "scripts": [
         "scripts/vagrant.sh",
         "scripts/vmtools.sh",
@@ -17,48 +17,58 @@
   "post-processors": [
     {
       "type": "vagrant",
-      "output": {{ output_box_name }}
+      "output": "{{ output_box_name }}.box"
+    },
+    {
+      "type":     "vagrant-s3",
+      "region": "{{ s3_region }}",
+      "bucket":   "{{ s3_bucket }}",
+      "manifest": "vagrant/{{ output_box_name }}.json",
+      "box_name": "{{ output_box_name }}.box",
+      "box_dir":  "vagrant/boxes",
+      "version":  "{{ build_bersion }}"
     }
   ],
   "builders": [
     {
       "type": "virtualbox-iso",
-      "iso_url": {{ centos_net_iso_url }},
-      "iso_checksum": {{ centos_net_iso_checksum }},
+      "vm_name": "{{ output_box_name }}",
+      "iso_url": "{{ centos_net_iso_url }}",
+      "iso_checksum": "{{ centos_net_iso_checksum }}",
       "iso_checksum_type": "sha256",
-      "ssh_username": {{ vagrant_ssh_username }},
-      "ssh_password": {{ vagrant_ssh_password }},
+      "ssh_username": "{{ vagrant_ssh_username }}",
+      "ssh_password": "{{ vagrant_ssh_password }}",
       "boot_command": [
-        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+        "<tab> text ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/ks.cfg<enter><wait>"
       ],
       "disk_size": {{ vagrant_disk_size }},
       "hard_drive_interface": "sata",
-      "guest_additions_path": "/usr/share/virtualbox/VBoxGuestAdditions.iso",
-      "guest_additions_sha256": {{ vitualbox_guest_additions_sha256sum }},
-      "guest_os_type": {{ vagrant_guest_os_type }},
-      "headless": "true",
+      "guest_additions_path": "/home/{{ vagrant_ssh_username }}/VBoxGuestAdditions.iso",
+      "guest_additions_sha256": "{{ virtualbox_guest_additions_sha256sum }}",
+      "guest_os_type": "{{ vagrant_guest_os_type }}",
+      "headless": "{{ virtualbox_headless_mode }}",
       "http_directory": "http",
       "shutdown_command": "sudo /sbin/halt -p",
       "vboxmanage": [
-        [ "modifyvm", "{{.Name}}", "--memory", {{ vagrant_memory }} ],
-        [ "modifyvm", "{{.Name}}", "--cpus", {{ vagrant_cpus }} ]
+        [ "modifyvm", "{% raw %}{{.Name}}{% endraw %}", "--memory", {{ vagrant_memory }} ],
+        [ "modifyvm", "{% raw %}{{.Name}}{% endraw %}", "--cpus", {{ vagrant_cpus }} ]
       ]
     },
     {
       "type": "vmware-iso",
-      "iso_url": {{ centos_net_iso_url }},
-      "iso_checksum": {{ centos_net_iso_checksum }},
+      "iso_url": "{{ centos_net_iso_url }}",
+      "iso_checksum": "{{ centos_net_iso_checksum }}",
       "iso_checksum_type": "sha256",
-      "ssh_username": {{ vagrant_ssh_username }},
-      "ssh_password": {{ vagrant_ssh_password }},
+      "ssh_username": "{{ vagrant_ssh_username }}",
+      "ssh_password": "{{ vagrant_ssh_password }}",
       "disk_size": {{ vagrant_disk_size }},
       "tools_upload_flavor": "linux",
-      "guest_os_type": {{ vmware_guest_os_type }},
+      "guest_os_type": "{{ vmware_guest_os_type }}",
       "headless": "true",
       "shutdown_command": "sudo /sbin/halt -p",
       "http_directory": "http",
       "boot_command": [
-        "<tab> text ks=http://{{ .HTTPIP }}:{{ .HTTPPort }}/ks.cfg<enter><wait>"
+        "<tab> text ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/ks.cfg<enter><wait>"
       ],
       "vmx_data": {
         "memsize": {{ vagrant_memory }},
