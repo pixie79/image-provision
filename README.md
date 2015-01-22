@@ -28,6 +28,9 @@ From your client pc you can now ssh to the CentOS base_vm as root. For the next 
     source ./bash_vars.sh
 
 
+python python-devel python-pip autoconf automake gcc
+
+
 Credits:
  - https://github.com/INSANEWORKS/centos-packer
  - http://www.idevelopment.info/data/AWS/AWS_Tips/AWS_Management/AWS_10.shtml
