@@ -5,6 +5,10 @@
 - file: name={{ build_dir }}/packer/centos-base state=directory mode=0755
 - file: name={{ build_dir }}/packer/centos-base/http state=directory mode=0755
 - file: name={{ build_dir }}/packer/centos-base/scripts state=directory mode=0755
+
+# Clean up old runs
+- file: name={{ build_dir}}/packer/centos-base/{{ output_box_name }}.box state=absent
+
 - template: src=CentOS6_base.json.j2 dest={{ build_dir }}/packer/centos-base/CentOS6_base.json mode=0444
 - template: src=ks.cfg.j2 dest={{ build_dir }}/packer/centos-base/http/ks.cfg mode=0755
 - template: src=vagrant.sh.j2 dest={{ build_dir }}/packer/centos-base/scripts/vagrant.sh mode=0755

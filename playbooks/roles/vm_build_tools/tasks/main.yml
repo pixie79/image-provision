@@ -21,11 +21,12 @@
 - yum: name=/opt/downloads/{{ vagrant_rpm_filename }} state=present
 
 # Install Virtualbox
-- get_url: url=http://download.virtualbox.org/virtualbox/rpm/el/virtualbox.repo dest=/etc/yum.repos.d/virtualbox.repo mode=0440
-- yum: name={{ virtualbox_version }} state=present
+- yum: name={{ virtualbox_rpm }} state=present
 
 # Install GoLang
 - get_url: url=https://storage.googleapis.com/golang/{{ go_filename }} dest=/opt/downloads/{{ go_filename }}
 - unarchive: src=/opt/downloads/{{ go_filename }} dest=/usr/local creates=/usr/local/go/bin/go
 - lineinfile: dest=/etc/profile.d/go.sh state=present line="PATH=/usr/local/go/bin:$PATH" create=true
 - shell: export GOPATH=/tmp && /usr/local/go/bin/go get github.com/lmars/packer-post-processor-vagrant-s3 && cp $GOPATH/bin/packer-post-processor-vagrant-s3 /opt/packer/
+
+- shell: name=sudo /etc/init.d/vboxdrv setup

@@ -8,7 +8,8 @@ vagrant_version: 1.7.2
 vagrant_sha256sum: 683d9926922685adfb456605ef6becaa811b87f18f54faf7c19abc4888636617
 vagrant_rpm_filename: "vagrant_{{ vagrant_version }}_x86_64.rpm"
 
-virtualbox_version: VirtualBox-4.3
+#virtualbox_rpm: http://download.virtualbox.org/virtualbox/4.3.20/VirtualBox-4.3-4.3.20_96996_el6-1.x86_64.rpm
+virtualbox_rpm: http://download.virtualbox.org/virtualbox/4.3.20/VirtualBox-4.3-4.3.20_96996_fedora18-1.x86_64.rpm
 
 go_version: 1.4.1
 go_arch: amd64

@@ -1,6 +1,7 @@
 {
   "variables": {
-    "version": {{ build_version }}
+    "version": {{ build_version }},
+    "home": {% raw %}"{{env `HOME`}}"{% endraw %}
   },
   "provisioners": [
     {
@@ -40,6 +41,7 @@
       "iso_checksum_type": "sha256",
       "ssh_username": "{{ vagrant_ssh_username }}",
       "ssh_password": "{{ vagrant_ssh_password }}",
+      "ssh_key_path": "{{ vagrant_ssh_key_path }}",
       "boot_command": [
         "<tab> text ks=http://{% raw %}{{ .HTTPIP }}:{{ .HTTPPort }}{% endraw %}/ks.cfg<enter><wait>"
       ],
@@ -63,6 +65,7 @@
       "iso_checksum_type": "sha256",
       "ssh_username": "{{ vagrant_ssh_username }}",
       "ssh_password": "{{ vagrant_ssh_password }}",
+      "ssh_key_path": "{{ vagrant_ssh_key_path }}",
       "disk_size": {{ vagrant_disk_size }},
       "tools_upload_flavor": "linux",
       "guest_os_type": "{{ vmware_guest_os_type }}",

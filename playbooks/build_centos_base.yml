@@ -1,4 +1,5 @@
 
+# When setting the vars below swap is set to twice memory and taken from space inside disk_size so ensure you create the disk bigger
 ---
 - hosts:
   - localhost
@@ -9,7 +10,8 @@
     vagrant_ssh_password: vagrant
     vagrant_root_password: vagrant
     vagrant_ssh_public_key_url: https://raw.githubusercontent.com/pixie79/vagrant/master/keys/vagrant.pub
-    vagrant_disk_size: 20480
+    vagrant_ssh_key_path: "{% raw %}{{user `home`}}{% endraw %}/.ssh/vagrant"
+    vagrant_disk_size: 51200
     vagrant_memory: 4096
     vagrant_cpus: 2
     virtualbox_headless_mode: false
