@@ -65,6 +65,14 @@
 - file: name={{ mount_dir }}/var/lib state=directory mode=0755
 - file: name={{ mount_dir }}/var/lib/rpm state=directory mode=0755
 
+# Copy over default password files and create an access user - who must exist on the local build vm first as this is used as a template.
+- copy: src=/etc/passwd dest={{ mount_dir }}/etc/passwd mode=0644
+- copy: src=/etc/group dest={{ mount_dir }}/etc/group mode=0644
+#- copy: src=/etc/shadow dest={{ mount_dir }} /etc/shadow mode=0000
+- file: name={{ mount_dir }}/home/{{ vagrant_ssh_username }} mode=0755 owner={{ vagrant_ssh_username }} group={{ vagrant_ssh_username }} state=directory
+- file: name={{ mount_dir }}/home/{{ vagrant_ssh_username }}/.ssh mode=0700 owner={{ vagrant_ssh_username }} group={{ vagrant_ssh_username }} state=directory
+- copy: src=authorized_keys dest=/home/{{ vagrant_ssh_username }}/.ssh/authorized_keys mode=0600 owner={{ vagrant_ssh_username }} group={{ vagrant_ssh_username }}
+
 # Populate the /dev directory with a minimal set of devices. Ignore any MAKEDEV: mkdir: File exists warnings.
 
 - command: /sbin/MAKEDEV -d {{ mount_dir }}/dev -x console
@@ -142,6 +150,7 @@
 - template: src=fstab.j2 dest={{ mount_dir }}/etc/fstab mode=0660
 
 - command: /usr/sbin/chroot {{ mount_dir }} /sbin/chkconfig --level 2345 network on
+- command: /usr/sbin/chroot {{ mount_dir }} /sbin/chkconfig --level 2345 sshd on
 
 # Setup Guest grub with correct kernel
 - file: src=/boot/grub/grub.conf dest={{ mount_dir }}/boot/grub/menu.1st state=link

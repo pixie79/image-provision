@@ -2,3 +2,4 @@
 bash_vars.sh
 #*
 certs.yml
+authorized_keys

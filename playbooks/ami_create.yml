@@ -17,6 +17,7 @@
     ec2_ami_bucket: "{{ lookup('env', 'AWS_AMI_BUCKET') }}"
     ec2_java_home: "{{ lookup('env', 'JAVA_HOME') }}"
     aws_region: us-east-1
+    vagrant_ssh_username: vagrant
   roles:
   - ami
 
