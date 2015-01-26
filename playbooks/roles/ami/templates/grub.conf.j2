@@ -1,0 +1,6 @@
+default=0
+timeout=0
+title CentOS 6.6 (Custom AMI)
+root (hd0)
+kernel /boot/{{ vmlinuz_version.stdout }} ro root={{ root_disk_label }} rd_NO_PLYMOUTH
+initrd /boot/{{ initramfs_version.stdout }}

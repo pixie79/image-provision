@@ -31,6 +31,13 @@ From your client pc you can now ssh to the CentOS base_vm as root. For the next 
 python python-devel python-pip autoconf automake gcc
 
 
+
+ansible-vault create playbooks/roles/ami/vars/certs.yml
+---
+- ec2_certs: |
+copy cert here
+
+
 Credits:
  - https://github.com/INSANEWORKS/centos-packer
  - http://www.idevelopment.info/data/AWS/AWS_Tips/AWS_Management/AWS_10.shtml

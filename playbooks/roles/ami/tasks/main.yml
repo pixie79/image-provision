@@ -30,8 +30,8 @@
 
 # Fetch ec2 API & AMI Tools then install
 - get_url: url={{ ec2_api_tools_url }} dest={{ build_dir }}/tools/ec2-api-tools.zip
-
 - unarchive: src={{ build_dir }}/tools/ec2-api-tools.zip dest={{ build_dir }}/tools copy=no
+- template: src=amazon_vars.sh.j2 dest={{ build_dir }}
 
 # TODO: Fix creates line
 - shell: mv {{ build_dir }}/tools/ec2-api-tools-{{ ec2_api_tools_version }}/* {{ build_dir }}/tools/
@@ -42,13 +42,16 @@
 - yum: name=http://s3.amazonaws.com/ec2-downloads/ec2-ami-tools-{{ ec2_ami_tools_version }}.noarch.rpm state=present
 
 # Create the image loopback file and format
-- shell: dd if=/dev/zero of={{ build_dir }}/images/{{ centos_version }}-base.img bs=1M count=10240 && mkfs.ext4 -F -j {{ build_dir }}/images/{{ centos_version }}-base.img
+- shell: dd if=/dev/zero of={{ build_dir }}/images/{{ centos_version }}-base.img bs=1M count=10240 && mkfs.ext4 -F -L {{ root_disk_label }} -j {{ build_dir }}/images/{{ centos_version }}-base.img 
   args:
     chdir: "{{ build_dir }}/images/"
     creates: "{{ build_dir }}/images/{{centos_version }}-base.img"
 
 # Mount the image file via the loopback mount point
-- mount: name={{ mount_dir }} src={{ build_dir }}/images/{{centos_version }}-base.img fstype=ext4 opts=rw state=present
+- command: mount -o loop {{ build_dir }}/images/{{ centos_version }}-base.img {{ mount_dir }}
+  args:
+    creates: "{{ mount_dir }}/lost+found"
+    warn: True
 
 # Create the base directories within the image file
 - file: name={{ mount_dir }}/dev state=directory mode=0755
@@ -95,10 +98,6 @@
     creates: "{{ mount_dir }}/dev/pts/0"
     warn: False
 
-- command: mount -o bind /dev/shm {{ mount_dir}}/dev/shm
-  args:
-    warn: False
-
 - command: mount -o bind /proc {{ mount_dir }}/proc
   args:
     creates: "{{ mount_dir }}/proc/loadavg"
@@ -116,7 +115,9 @@
 
 - yum: name={{ item }}  conf_file={{ build_dir }}/yum/yum.conf state=present
   with_items:
-    - "*openssh*"
+    - openssh
+    - openssh-clients
+    - openssh-server
     - dhclient
     - grub
     - e2fsprogs
@@ -130,14 +131,66 @@
     - selinux-policy 
     - selinux-policy-targeted
     - libselinux-python
+    - docker-io
+    - cloud-init
 
 - copy: src=root_bashrc dest={{ mount_dir }}/root/.bashrc mode=0400
 - copy: src=root_bash_profile dest={{ mount_dir }}/root/.bash_profile mode=0400
 - copy: src=network dest={{ mount_dir }}/etc/sysconfig/network mode=0440
 - copy: src=ifcfg-eth0 dest={{ mount_dir }}/etc/sysconfig/network-scripts/ifcfg-eth0
 - copy: src=selinux dest={{ mount_dir }}/etc/sysconfig/selinux
-- copy: src=fstab dest={{ mount_dir }}/etc/fstab mode=0660
+- template: src=fstab.j2 dest={{ mount_dir }}/etc/fstab mode=0660
 
 - command: /usr/sbin/chroot {{ mount_dir }} /sbin/chkconfig --level 2345 network on
 
-#    - cloud-init
+# Setup Guest grub with correct kernel
+- file: src=/boot/grub/grub.conf dest={{ mount_dir }}/boot/grub/menu.1st state=link
+
+- shell: ls {{ mount_dir}}/boot/vmlin*|awk -F/ '{print $NF}'
+  register: vmlinuz_version
+  ignore_errors: True
+  
+- shell: ls {{ mount_dir}}/boot/initramfs*.img|awk -F/ '{print $NF}'
+  register: initramfs_version
+  ignore_errors: True
+
+- template: src=grub.conf.j2 dest={{ mount_dir }}/boot/grub/grub.conf
+
+- template: src=sshd_conf.j2 dest={{ mount_dir }}/etc/sshd_conf
+
+# Image cleanup
+- shell: yum --installroot={{ mount_dir }} -y clean all
+- file: name={{ mount_dir }}/root/.bash_history state=absent
+- file: name={{ mount_dir }}/vagrant/.bash_history state=absent
+
+- shell: sync && sync && sync && sync
+- shell: umount {{ mount_dir }}/dev/pts
+- shell: umount {{ mount_dir }}/dev
+- shell: umount {{ mount_dir }}/sys
+- shell: umount {{ mount_dir }}/proc
+- shell: umount {{ mount_dir }}
+
+
+# Create AMI
+
+- shell: "{{ ec2_vars }} ec2-describe-images --owner amazon --region {{ aws_region }} | grep {{ centos_arch }} | grep 'amazon' | grep 'pv-grub-hd0_' | awk '{ print $1, $2, $3, $5, $7 }' | head -n 1 | cut -f 2 -d ' '"
+  register: aki_image
+
+- debug: vars=aki_image
+
+- include_vars: certs.yml
+- copy:
+    content: "{{ ec2_cert }}"
+    dest: "{{ build_dir }}/certificates/ec2_cert.pem"
+    mode: 0400
+
+- copy:
+    content: "{{ ec2_key }}"
+    dest: "{{ build_dir }}/certificates/ec2_key.pem"
+    mode: 0400
+
+- shell: "{{ ec2_vars }} ec2-bundle-image --image {{ build_dir }}/images/{{ centos_version }}-base.img --prefix {{ centos_version }}-base --destination {{ build_dir }}/images --arch {{ centos_arch }} --kernel {{ aki_image.stdout }} --cert {{ build_dir }}/certificates/ec2_cert.pem --privatekey {{ build_dir }}/certificates/ec2_key.pem --user {{ ec2_account_number }}"
+
+- shell: "{{ ec2_vars }} ec2-upload-bundle --manifest {{ build_dir }}/images/{{ centos_version }}-base.manifest.xml --bucket {{ ec2_ami_bucket }} --access-key {{ ec2_access_key }} --secret-key {{ec2_secret_key }}"
+
+- shell: "{{ ec2_vars }} ec2-register {{ ec2_ami_bucket }}/{{ centos_version }}-base.manifest.xml --name {{ centos_name }} --description {{ centos_description }} --kernel {{ aki_image.stdout }}"

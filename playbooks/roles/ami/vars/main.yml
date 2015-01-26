@@ -2,12 +2,25 @@ centos_version_number: 6.6
 centos_arch: x86_64
 centos_rpm_key: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-CentOS-6
 centos_version: centos-{{ centos_version_number }}-{{ centos_arch }}
+centos_name: "CentOS {{ centos_version_number }} {{ centos_arch }} "
+centos_description: "CentOS {{ centos_version_number }} {{ centos_arch }} Base AMI"
 epel_version: 6
 epel_minor_version: 6-8
 epel_rpm_key: file:///etc/pki/rpm-gpg/RPM-GPG-KEY-EPEL-6
 epel_rpm: "http://dl.fedoraproject.org/pub/epel/{{ epel_version }}/{{ centos_arch }}/epel-release-{{ epel_minor_version }}.noarch.rpm"
 build_dir: /opt/build
 mount_dir: "{{ build_dir }}/mnt"
+root_disk_label: CentOS_Root
 ec2_api_tools_url: http://www.amazon.com/gp/redirect.html/ref=aws_rc_ec2tools?location=http://s3.amazonaws.com/ec2-downloads/ec2-api-tools.zip&token=A80325AA4DAB186C80828ED5138633E3F49160D9
 ec2_api_tools_version: 1.7.3.0
 ec2_ami_tools_version: 1.5.6
+openssh_permitrootlogin: no
+openssh_rsaauthentication: yes
+openssh_pubkeyauthentication: yes
+openssh_ignoreuserknownhosts: yes
+openssh_passwordauthentication: no
+openssh_allowagentforwarding: yes
+openssh_allowtcpforwarding: yes
+openssh_usedns: no
+openssh_permittunnel: yes
+ec2_vars: "EC2_HOME={{ ec2_home }} AWS_ACCESS_KEY={{ ec2_access_key }} AWS_SECRET_KEY={{ ec2_secret_key }} JAVA_HOME={{ ec2_java_home }} PATH={{ ec2_home }}/bin:/usr/local/bin:$PATH"

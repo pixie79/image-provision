@@ -4,9 +4,19 @@
 
 
 ---
+
 - hosts:
   - host_vm
   gather_facts: False
+  vars:
+    ec2_home: "{{ lookup('env', 'EC2_HOME') }}"
+    ec2_url: "{{ lookup('env', 'EC2_URL') }}"
+    ec2_account_number: "{{ lookup('env', 'AWS_ACCOUNT_NUMBER') }}"
+    ec2_access_key: "{{ lookup('env', 'AWS_ACCESS_KEY') }}"
+    ec2_secret_key: "{{ lookup('env', 'AWS_SECRET_KEY') }}"
+    ec2_ami_bucket: "{{ lookup('env', 'AWS_AMI_BUCKET') }}"
+    ec2_java_home: "{{ lookup('env', 'JAVA_HOME') }}"
+    aws_region: us-east-1
   roles:
   - ami
 
